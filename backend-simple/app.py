@@ -1,122 +1,133 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session
+import random
+import time
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'your_secret_key'  # Replace with your secret key
 
-def init_sqlite_db():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    # Create users table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS users(
-            username TEXT PRIMARY KEY,
-            password TEXT
-        )
-    ''')
-    # Create scores table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS scores(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            score INTEGER,
-            FOREIGN KEY(username) REFERENCES users(username)
-        )
-    ''')
-    conn.commit()
-    conn.close()
+@app.after_request
+def set_csp(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self';"
+    return response
 
-init_sqlite_db()
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    # Get top 10 scores
-    c.execute('''
-        SELECT username, MAX(score) as max_score FROM scores
-        GROUP BY username ORDER BY max_score DESC LIMIT 10
-    ''')
-    leaderboard = c.fetchall()
-    conn.close()
-    return render_template('index.html', username=session.get('username'), leaderboard=leaderboard)
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # Hash the password before storing
-        hashed_password = generate_password_hash(password)
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('login'))
-        except sqlite3.IntegrityError:
-            conn.close()
-            return "Username already exists. Please choose another."
-    return '''
-        <h2>Register</h2>
-        <form method="post">
-            Username: <input type="text" name="username" required><br><br>
-            Password: <input type="password" name="password" required><br><br>
-            <input type="submit" value="Register">
-        </form>
-    '''
+        # Get selected operations
+        operations = []
+        if 'add' in request.form:
+            operations.append('add')
+        if 'sub' in request.form:
+            operations.append('sub')
+        if 'mul' in request.form:
+            operations.append('mul')
+        if 'div' in request.form:
+            operations.append('div')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username=?", (username,))
-        result = c.fetchone()
-        conn.close()
-        if result and check_password_hash(result[0], password):
-            session['username'] = username
-            return redirect(url_for('index'))
-        else:
-            return "Invalid credentials. Please try again."
-    return '''
-        <h2>Login</h2>
-        <form method="post">
-            Username: <input type="text" name="username" required><br><br>
-            Password: <input type="password" name="password" required><br><br>
-            <input type="submit" value="Login">
-        </form>
-    '''
+        # Get number ranges
+        add_left_min = int(request.form.get('add_left_min', 2))
+        add_left_max = int(request.form.get('add_left_max', 100))
+        add_right_min = int(request.form.get('add_right_min', 2))
+        add_right_max = int(request.form.get('add_right_max', 100))
 
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    return redirect(url_for('index'))
+        mul_left_min = int(request.form.get('mul_left_min', 2))
+        mul_left_max = int(request.form.get('mul_left_max', 12))
+        mul_right_min = int(request.form.get('mul_right_min', 2))
+        mul_right_max = int(request.form.get('mul_right_max', 100))
 
-@app.route('/game')
+        # Get duration
+        duration = int(request.form.get('duration', 120))
+        session['duration'] = duration
+
+
+        session['operations'] = operations
+        session['add_range'] = (add_left_min, add_left_max, add_right_min, add_right_max)
+        session['mul_range'] = (mul_left_min, mul_left_max, mul_right_min, mul_right_max)
+        session['duration'] = duration
+
+        # Initialize game state
+        session['score'] = 0
+        session['problems_answered'] = 0
+        session['start_time'] = time.time()
+        session['problem'], session['answer'] = generate_problem()
+
+        return redirect(url_for('game'))
+    return render_template('index.html')
+
+
+
+@app.route('/game', methods=['GET', 'POST'])
 def game():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('game.html', username=session['username'])
+    if 'start_time' not in session:
+        return redirect(url_for('index'))
 
-@app.route('/submit_score', methods=['POST'])
-def submit_score():
-    if 'username' not in session:
-        return jsonify({'status': 'error', 'message': 'User not logged in'}), 403
-    score = request.json.get('score')
-    if score is None:
-        return jsonify({'status': 'error', 'message': 'No score provided'}), 400
-    username = session['username']
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO scores (username, score) VALUES (?, ?)', (username, score))
-    conn.commit()
-    conn.close()
-    return jsonify({'status': 'success'})
+    elapsed_time = time.time() - session['start_time']
+    remaining_time = session['duration'] - int(elapsed_time)
+
+    if remaining_time <= 0:
+        return redirect(url_for('result'))
+
+    if request.method == 'POST':
+        user_answer = request.form.get('answer')
+        if user_answer:
+            try:
+                user_answer = float(user_answer)
+                correct_answer = session.get('answer')
+                if abs(user_answer - correct_answer) < 1e-6:
+                    session['score'] += 1
+                session['problems_answered'] += 1
+            except ValueError:
+                pass  # Invalid input, treat as incorrect
+        # Generate new problem
+        session['problem'], session['answer'] = generate_problem()
+
+    return render_template('game.html',problem=session['problem'],remaining_time=remaining_time,score=session['score']
+)
+
+@app.route('/result')
+def result():
+    score = session.get('score', 0)
+    problems_answered = session.get('problems_answered', 0)
+    session.clear()
+    return render_template('result.html', score=score, problems_answered=problems_answered)
+
+def generate_problem():
+    operations = session.get('operations', ['add', 'sub', 'mul', 'div'])
+    op = random.choice(operations)
+    if op == 'add':
+        add_left_min, add_left_max, add_right_min, add_right_max = session.get('add_range', (2, 100, 2, 100))
+        a = random.randint(add_left_min, add_left_max)
+        b = random.randint(add_right_min, add_right_max)
+        problem = f"{a} + {b}"
+        answer = a + b
+    elif op == 'sub':
+        add_left_min, add_left_max, add_right_min, add_right_max = session.get('add_range', (2, 100, 2, 100))
+        a = random.randint(add_left_min, add_left_max)
+        b = random.randint(add_right_min, add_right_max)
+        if b > a:
+            a, b = b, a
+        problem = f"{a} - {b}"
+        answer = a - b
+    elif op == 'mul':
+        mul_left_min, mul_left_max, mul_right_min, mul_right_max = session.get('mul_range', (2, 12, 2, 100))
+        a = random.randint(mul_left_min, mul_left_max)
+        b = random.randint(mul_right_min, mul_right_max)
+        problem = f"{a} × {b}"
+        answer = a * b
+    elif op == 'div':
+        mul_left_min, mul_left_max, mul_right_min, mul_right_max = session.get('mul_range', (2, 12, 2, 100))
+        b = random.randint(mul_left_min, mul_left_max)
+        answer = random.randint(mul_right_min, mul_right_max)
+        a = b * answer
+        problem = f"{a} ÷ {b}"
+    else:
+        # Default to addition
+        a = random.randint(2, 100)
+        b = random.randint(2, 100)
+        problem = f"{a} + {b}"
+        answer = a + b
+    return problem, answer
+
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    app.run()

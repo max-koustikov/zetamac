@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+    <title>{% block title %}Arithmetic Game{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div id="container">
+        {% block content %}{% endblock %}
+    </div>
+    <footer>
+        <p>&copy; 2023 Arithmetic Game</p>
+    </footer>
+</body>
+</html>

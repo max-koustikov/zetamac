@@ -1,86 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Arithmetic Game</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% if username %}
-        <p>Welcome, {{ username }}! <a href="{{ url_for('logout') }}">Logout</a></p>
-    {% else %}
-        <p>Welcome, Guest! <a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('register') }}">Register</a></p>
-    {% endif %}
-    <h1>Arithmetic Game</h1>
-    <h2>Leaderboard</h2>
-    <table>
-        <tr>
-            <th>Rank</th>
-            <th>Username</th>
-            <th>Score</th>
-        </tr>
-        {% for entry in leaderboard %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ entry[0] }}</td>
-            <td>{{ entry[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% if username %}
-        <a href="{{ url_for('game') }}"><button>Play Game</button></a>
-    {% else %}
-        <p>Please log in to play the game.</p>
-    {% endif %}
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Arithmetic Game</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>Arithmetic Game</h1>
-
-    <div id="settings">
-        <h2>Game Settings</h2>
-        <label for="digit-count">Number of Digits:</label>
-        <select id="digit-count">
-            <option value="1">1-digit numbers</option>
-            <option value="2">2-digit numbers</option>
-            <option value="3">3-digit numbers</option>
-        </select>
-
-        <h3>Select Operations:</h3>
-        <label><input type="checkbox" class="operation" value="+" checked> Addition (+)</label><br>
-        <label><input type="checkbox" class="operation" value="-" checked> Subtraction (-)</label><br>
-        <label><input type="checkbox" class="operation" value="×" checked> Multiplication (×)</label><br>
-        <label><input type="checkbox" class="operation" value="÷" checked> Division (÷)</label><br>
-
-        <h3>Question Presentation:</h3>
-        <label><input type="checkbox" id="enable-text" checked> Text</label><br>
-        <label><input type="checkbox" id="enable-speech" checked> Speech</label><br>
-
-        <button id="start-button">Start Game</button>
+    <div id="container">
+        <h1>Arithmetic Game</h1>
+        <p>The Arithmetic Game is a fast-paced speed drill where you are given two minutes to solve as many arithmetic problems as you can.</p>
+        <p>If you have any questions, please contact <a href="mailto:arithmetic@example.com">arithmetic@example.com</a>.</p>
+        <form action="/" class="game-options" method="post">
+            <dl>
+                <dt>
+                    <label>
+                        <input checked name="add" type="checkbox">
+                        Addition
+                    </label>
+                </dt>
+                <dd>Range: (<input type="text" name="add_left_min" id="add_left_min" value="2"> to <input type="text" name="add_left_max" id="add_left_max" value="100">) +
+                (<input type="text" name="add_right_min" id="add_right_min" value="2"> to <input type="text" name="add_right_max" id="add_right_max" value="100">)</dd>
+                <dt>
+                    <label>
+                        <input checked name="sub" type="checkbox">
+                        Subtraction
+                    </label>
+                </dt>
+                <dd>Addition problems in reverse.</dd>
+                <dt>
+                    <label>
+                        <input checked name="mul" type="checkbox">
+                        Multiplication
+                    </label>
+                </dt>
+                <dd>Range: (<input type="text" name="mul_left_min" id="mul_left_min" value="2"> to <input type="text" name="mul_left_max" id="mul_left_max" value="12">) ×
+                (<input type="text" name="mul_right_min" id="mul_right_min" value="2"> to <input type="text" name="mul_right_max" id="mul_right_max" value="100">)</dd>
+                <dt>
+                    <label>
+                        <input checked name="div" type="checkbox">
+                        Division
+                    </label>
+                </dt>
+                <dd>Multiplication problems in reverse.</dd>
+            </dl>
+            <p>
+                Duration:
+                    <select name="duration">
+                        <option value="30">30 seconds</option>
+                        <option value="60">60 seconds</option>
+                        <option selected value="120">120 seconds</option>
+                        <option value="300">300 seconds</option>
+                        <option value="600">600 seconds</option>
+                    </select>
+            </p>
+            <input type="submit" value="Start">
+        </form>
     </div>
-
-    <div id="game" style="display: none;">
-        <div id="timer">Time Left: <span id="time">60</span>s</div>
-        <div id="score">Score: <span id="current-score">0</span></div>
-        <div id="problem" style="display: none;"></div>
-        <button id="repeat-button" style="display: none;">Repeat Question</button>
-        <input type="text" id="answer" autocomplete="off" placeholder="Your answer">
-        <div id="feedback"></div>
-        <div id="game-over" style="display: none;">
-            <h2>Game Over!</h2>
-            <p>Your final score is: <span id="final-score">0</span></p>
-            <button id="restart-button">Play Again</button>
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

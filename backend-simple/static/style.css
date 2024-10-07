@@ -1,106 +1,235 @@
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f7f7f7;
+/* Reset browser default margins and paddings */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-h1 {
-    margin-top: 20px;
+/* Set the page background to white */
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; /* Set default font size to 14px */
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black font color */
+    display: flex;           /* Use flexbox for centering horizontally */
+    justify-content: center; /* Center horizontally */
+    align-items: flex-start; /* Align items to the top */
+    min-height: 100vh;       /* Full viewport height */
+    text-align: center;      /* Center text inside container */
+    margin: 0;               /* Remove default body margin */
 }
 
-#settings, #game {
-    max-width: 400px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Container box styling */
+#container {
+    width: 480px;             /* Fixed width */
+    padding: 20px;            /* Internal padding */
+    background-color: #dddddd; /* Light grey background */
+    border-radius: 0;         /* Straight edges */
+    text-align: left;         /* Align text to the left for form */
+    margin-top: 0;            /* No space at the top */
+    height: 480px;
 }
 
-#settings h2, #game h2 {
-    margin-bottom: 20px;
+/* Title styling */
+#container h1 {
+    font-size: 2em;          /* Larger font for the title */
+    text-align: left;       /* Center the title */
+    margin-bottom: 10px;      /* Space below the title */
+    margin-top: 0.67em;      /* Space below the title */
 }
 
+/* Paragraph styling */
+#container p {
+    font-size: 14px;          /* Set to 14px as per requirement */
+    margin-bottom: 15px;      /* Space below paragraphs */
+}
+
+/* Form styling */
+form.game-options {
+    text-align: left; /* Align form content to the left */
+}
+
+/* Description list styling */
+dl {
+    margin-bottom: 15px; /* Space below the list */
+}
+
+/* Term (dt) styling */
+dt {
+    margin-bottom: 5px;  /* Space below each term */
+    font-size: 14px;     /* Set to 14px */
+}
+
+/* Description (dd) styling */
+dd {
+    margin-left: 0;       /* Remove left margin to reduce space */
+    margin-bottom: 10px;  /* Space below descriptions */
+    font-size: 14px;      /* Set to 14px */
+}
+
+/* Input fields for ranges */
+#container input[type="text"] {
+    width: 40px;          /* Fixed small width */
+    padding: 2px 5px;     /* Reduced padding */
+    font-size: 14px;      /* Set to 14px */
+    text-align: center;   /* Center text inside inputs */
+    margin: 0 2px;        /* Small horizontal margin */
+}
+
+/* Select dropdown styling */
+#container select {
+    font-size: 14px;      /* Set to 14px */
+    padding: 2px 5px;     /* Reduced padding */
+}
+
+/* Submit button styling */
+input[type="submit"] {
+    font-size: 14px;           /* Set to 14px */
+    padding: 5px 10px;         /* Reduced padding */
+    background-color: #5cb85c; /* Green background */
+    color: #ffffff;            /* White text */
+    border: none;              /* Remove border */
+    border-radius: 0;          /* Straight edges */
+    cursor: pointer;           /* Pointer cursor on hover */
+    float: right;              /* Float the button to the right */
+    margin-top: 10px;          /* Space above the button */
+}
+
+/* Hover effect for submit button */
+input[type="submit"]:hover {
+    background-color: #4cae4c; /* Darker green on hover */
+}
+
+/* Clear floats after the form */
+form.game-options::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Optional: Adjust label cursor */
 label {
-    display: block;
-    margin: 10px 0;
+    cursor: pointer; /* Pointer cursor for labels */
 }
 
-select, input[type="checkbox"] {
-    margin-right: 10px;
+/* General Styles */
+body {
+    font: 14px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black font color */
 }
 
-#timer, #score {
-    font-size: 18px;
-    margin: 10px 0;
+#game {
+    width: 100%;
+    text-align: center;
 }
 
-#problem {
-    font-size: 24px;
-    margin: 20px 0;
-}
-
-#answer {
-    width: calc(100% - 20px);
+#game .header {
+    display: flex;
+    justify-content: space-between;
     padding: 10px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
+    font-size: 14px;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-top: 20px;
-    border-radius: 10px;
-    border: none;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
+#game .timer, #game .score {
+    font-size: 14px;
 }
 
-button:hover {
-    background-color: #45a049;
+#game .banner {
+    text-align: center;
+    margin-top: 50px;
+    padding: 10px 0;
+    line-height: 54px;
+    font-size: 36px;
+    background-color: #dddddd;
 }
 
-#feedback {
-    color: red;
-    margin-top: 10px;
-    min-height: 20px;
+#game .banner .problem {
+    font-size: 36px;
 }
 
-#game-over {
-    margin-top: 20px;
+#game .banner .answer {
+    font-size: 36px;
+    width: 100px;
+    text-align: center;
+    margin-left: 10px;
 }
 
-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-    width: 80%;
+form {
+    display: inline-block;
 }
 
-th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
+input[type="text"].answer {
+    font-size: 36px;
+    width: 100px;
+    text-align: center;
+    margin-left: 10px;
 }
 
-th {
-    background-color: #f2f2f2;
+
+/* General Styles */
+body {
+    font: 14px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff; /* White background */
+    color: #000000; /* Black font color */
 }
 
-@media (max-width: 500px) {
-    #settings, #game {
-        width: 90%;
-        padding: 15px;
-    }
+#game {
+    width: 100%;
+    text-align: center;
+}
 
-    button, #answer {
-        font-size: 16px;
-    }
+#game .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 14px;
+}
 
-    #timer, #score {
-        font-size: 16px;
-    }
+#game .timer {
+    font-size: 20px; /* Updated font size */
+}
+
+#game .score {
+    font-size: 14px;
+}
+
+#game .banner {
+    text-align: center;
+    margin-top: 100px; /* Increased margin-top to lower the banner */
+    padding: 10px 0;
+    line-height: 54px;
+    font-size: 36px;
+    background-color: #dddddd;
+}
+
+#game .banner .problem {
+    font-size: 36px;
+}
+
+#game .banner .answer {
+    font-size: 36px;
+    width: 100px;
+    text-align: center;
+    margin-left: 10px;
+}
+
+form {
+    display: inline-block;
+}
+
+input[type="text"].answer {
+    font-size: 36px;
+    width: 100px;
+    text-align: center;
+    margin-left: 10px;
+}
+.correct {
+    border: 2px solid green;
+    background-color: #e0ffe0;
+    transition: background-color 0.3s, border 0.3s;
 }
